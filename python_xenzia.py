@@ -34,7 +34,7 @@ class Snake:
     def __init__(self):
         self.segments=[(15,15),(16,15)]#each segment represents the position of each segment of the snake
         self.direction=1
-        snake_image=[]
+        snake_image=[] #array holding all images
         for i in ['shmo_','shmc_']:
             for j in ['right.png','left.png','up.png','down.png']:
                 image=pygame.image.load(i+j)
@@ -43,22 +43,30 @@ class Snake:
         segment=pygame.image.load('segment.png')
         segment=pygame.transform.scale(segment,(10,10))
         snake_image.insert(0,segment)
-        self.image=snake_image
         
-    
-    def add(self,i,j):
-       self.segments.append(i,j)
+        self.image=snake_image  #to access those images easily
+        
+   
        
     
         
 
 class berry:
+    '''
+    class for the berry the snake eats
+    '''
     def __init__(self):
         self.x=3
-        self.y=2
+        self.y=2 #x and y position of the berry
+        
         berry_img=pygame.image.load('python_berry.png')
-        self.image=berry_img=pygame.transform.scale(berry_img,(10,10))
+        self.image=berry_img=pygame.transform.scale(berry_img,(10,10))#importing and scaling the image
+        
     def move(self,snake):
+        '''
+        sets a new point for the x and y of the berry
+        but those points must not go beyond the wall and must not land on the snake
+        '''
         while True:
             x=random.randint(0,29)
             y=random.randint(0,29)
@@ -68,24 +76,33 @@ class berry:
         self.y=y
 
     def draw_berry(self,surface):
+        '''
+        blits the berry to the given surface
+        '''
         surface.blit(self.image,(100+10*self.x,100+10*self.y))
         pygame.display.update()
 
 class Game:
+    '''
+    all game variables
+    '''
     def __init__(self):
-        self.snake=Snake()
-        self.berry=berry()
-        self.map=[[0]*32 for i in range(32)]
+        self.snake=Snake() #snake object
+        self.berry=berry() #berry object
+        self.map=[[0]*32 for i in range(32)] #describes the arrangement of the walls
         for i in range(32):
             for j in range(32):
                 if i==0 or j==0 or i==31 or j==31:
                     self.map[i][j]=1
-        self.speed=200
-        self.tick=200
-        self.frame=1
-        self.score=0
+        self.speed=200 #speed of game in miliseconds
+        self.tick=200 #same as above
+        self.frame=1 #determones what face the snake should show per time
+        self.score=0 #game score
 
     def draw_snake(self,surface):
+        '''
+        blits image of the snake to the surface
+        '''
         snake=self.snake
         surface.blit(snake.image[4*self.frame+snake.direction],
                      (100+10*snake.segments[0][0],100+10*snake.segments[0][1]))
@@ -95,15 +112,13 @@ class Game:
             pygame.display.update()
             
     def moves(self,game_time):
-        if self.snake.direction==0:
-            move=(0,0)
-        if self.snake.direction==1:
+        if self.snake.direction==1:#right
             move=(1,0)
-        if self.snake.direction==2:
+        if self.snake.direction==2:#left
             move=(-1,0)
-        if self.snake.direction==3:
+        if self.snake.direction==3:#up
             move=(0,-1)
-        if self.snake.direction==4:
+        if self.snake.direction==4:#down
             move=(0,1)
         self.tick-=game_time
         
@@ -113,6 +128,7 @@ class Game:
             self.frame+=1
             self.frame%=2
             snake=self.snake
+            #moving the snake semgments
             x,y=snake.segments[0][0]+move[0],snake.segments[0][1]+move[1]
             for i in range(len(snake.segments)):
                 a,b=snake.segments[i]
@@ -120,20 +136,29 @@ class Game:
                 x,y=a,b
             head=self.snake.segments[0]
             
+            #if the snake eats the berry
             if head==(self.berry.x,self.berry.y):
                 last=self.snake.segments[-1]
                 self.snake.segments.append(last)
                 self.berry.move(self.snake)
-                self.speed-=10
-                self.score+=100
+                self.speed-=10# increase speed
+                self.score+=100 #increase score
                 if self.speed<=30:
                     self.speed=30
+                    
     def head_hit_wall(self):
+        '''
+        returns True if the head of the snake hits the wall
+        '''
         head=self.snake.segments[0]
         if head[0]<0 or head[0]>29 or head[1]<0 or head[1]>29:
             return True
         return False
+    
     def head_hit_myself(self):
+        '''
+        returns true if tthe snakes head hits another part of the body
+        '''
         head=self.snake.segments[0]
         for i in range(1,len(self.snake.segments)):
             if head==self.snake.segments[i]:
@@ -144,8 +169,11 @@ class Game:
 game=Game()
 
 def draw_game(game,surface,brick):
-    surface.fill((0,0,0))
-    surface.blit(python,(0,0))
+    '''
+    draws the entire game surface
+    '''
+    surface.fill((0,0,0)) #background
+    surface.blit(python,(0,0))#picture view
     text='SCORE: %d'%game.score
     font=pygame.font.Font(None,30)
     text=font.render(text,7,(255,255,255))
@@ -175,14 +203,7 @@ def game_over(surface):
     surface.blit(text,back)
     pygame.display.update()
     time.sleep(0.5)
-    '''
-    #second stage
-    surface.fill((0,0,0))
-    text2=font.render(text2,10,(255,255,255))
-    back=text2.get_rect(centerx=surface.get_width()/2,centery=surface.get_height()/2)
-    surface.blit(text2,back)
-    pygame.display.update()
-    '''
+    
 
 while True:
     draw_game(game,surface,brick)
