@@ -106,12 +106,16 @@ class Game:
         snake=self.snake
         surface.blit(snake.image[4*self.frame+snake.direction],
                      (100+10*snake.segments[0][0],100+10*snake.segments[0][1]))
+        surface.blit(snake.image[0],
+                     (100+10*snake.segments[1][0],100+10*snake.segments[1][1]))
+        '''
         for i in range(1,len(snake.segments)):
             x,y=snake.segments[i]
             surface.blit(snake.image[0],(100+10*x,100+10*y))
-            pygame.display.update()
+        '''
+        pygame.display.update()
             
-    def moves(self,game_time):
+    def moves(self,game_time,surface):
         if self.snake.direction==1:#right
             move=(1,0)
         if self.snake.direction==2:#left
@@ -129,12 +133,17 @@ class Game:
             self.frame%=2
             snake=self.snake
             #moving the snake semgments
+            surface.fill((0,0,0),
+                     (100+10*snake.segments[-1][0],100+10*snake.segments[-1][1],10,10))
+            pygame.display.update()
             x,y=snake.segments[0][0]+move[0],snake.segments[0][1]+move[1]
             for i in range(len(snake.segments)):
                 a,b=snake.segments[i]
                 snake.segments[i]=(x,y)
                 x,y=a,b
             head=self.snake.segments[0]
+
+            
             
             #if the snake eats the berry
             if head==(self.berry.x,self.berry.y):
@@ -143,8 +152,8 @@ class Game:
                 self.berry.move(self.snake)
                 self.speed-=10# increase speed
                 self.score+=100 #increase score
-                if self.speed<=30:
-                    self.speed=30
+                if self.speed<=15:
+                    self.speed=15
                     
     def head_hit_wall(self):
         '''
@@ -164,6 +173,7 @@ class Game:
             if head==self.snake.segments[i]:
                 return True
         return False
+    pygame.display.update()
             
 
 game=Game()
@@ -174,11 +184,7 @@ def draw_game(game,surface,brick):
     '''
     surface.fill((0,0,0)) #background
     surface.blit(python,(0,0))#picture view
-    text='SCORE: %d'%game.score
-    font=pygame.font.Font(None,30)
-    text=font.render(text,7,(255,255,255))
-    text_rect=text.get_rect(centerx=surface.get_width()/2,centery=70)
-    surface.blit(text,text_rect)
+    
     for i in range(32):
         for j in range(32):
             if game.map[i][j]==1:
@@ -186,7 +192,16 @@ def draw_game(game,surface,brick):
     game.berry.draw_berry(surface)
     game.draw_snake(surface)
     pygame.display.update()
-
+    
+def show_score(surface):
+    surface.fill((0,0,0),(150,0,300,80))
+    text='SCORE: %d'%game.score
+    font=pygame.font.Font(None,30)
+    text=font.render(text,7,(255,255,255))
+    text_rect=text.get_rect(centerx=surface.get_width()/2,centery=70)
+    surface.blit(text,text_rect)
+    pygame.display.update()
+    
 def game_over(surface):
     '''
     shows game over on the screen an asks if they want to play again
@@ -204,13 +219,15 @@ def game_over(surface):
     pygame.display.update()
     time.sleep(0.5)
     
-
+draw_game(game,surface,brick)
 while True:
-    draw_game(game,surface,brick)
+    
     pygame.display.update()
-
-    game.moves(fpsClock.get_time())
-    if game.head_hit_wall() or game.head_hit_myself():
+    game.draw_snake(surface)
+    game.berry.draw_berry(surface)
+    game.moves(fpsClock.get_time(),surface)
+    show_score(surface)
+    if game.head_hit_wall() or game.head_hit_myself(): 
         game.snake.direction=0
         time.sleep(1)
         game_over(surface)
@@ -244,5 +261,5 @@ while True:
         
     
     pygame.display.update()
-    fpsClock.tick(30)
+    fpsClock.tick(1000)
         
