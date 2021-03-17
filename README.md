@@ -5,4 +5,5 @@ Another project in pygame.
 - Ensure all files are the same folder or directory
 - Ensure python and pygame is installed on your computer
 - Open **pyhton_xenzia.py** file
-- Enjoy the game
+- Use arrow keys to control the snake
+
